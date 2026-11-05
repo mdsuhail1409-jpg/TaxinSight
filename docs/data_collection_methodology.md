@@ -83,3 +83,4 @@ Statistical variance and extreme observations are analyzed using standard z-scor
 - **Documented Macro Outlier**: FY 2021-22 recorded a Net Direct Tax YoY growth of **+49.12%** ($z = +2.59$).
 - **Methodological Context**: Official CBDT releases confirm that this spike resulted from a post-COVID-19 economic rebound combined with a depressed base effect from FY 2020-21 (when net collections had contracted due to pandemic disruptions and accelerated liquidity refund clearance drives).
 - **Professional Standard**: Statistical outliers are contextualized using official economic factors and **never attributed to fraud or wrongdoing without formal statutory evidence**.
+

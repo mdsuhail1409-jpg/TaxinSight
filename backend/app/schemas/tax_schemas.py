@@ -6,7 +6,7 @@ class APIResponse(BaseModel):
     success: bool = True
     data: Any
     message: Optional[str] = "Operation completed successfully"
-    timestamp: str = Field(default_factory=lambda: "2026-11-05T14:30:00Z")
+    timestamp: str = Field(default_factory=lambda: "2026-11-05T20:20:00Z")
 
 
 class KPIItem(BaseModel):
@@ -61,6 +61,8 @@ class RevenueTimeSeriesItem(BaseModel):
     cost_of_collection_pct: Optional[float] = None
     yoy_gross_growth: Optional[float] = None
     yoy_net_growth: Optional[float] = None
+    corporate_tax_contribution_pct: Optional[float] = None
+    personal_tax_contribution_pct: Optional[float] = None
 
 
 class BuoyancyItem(BaseModel):
@@ -130,6 +132,8 @@ class ITRAnalyticsData(BaseModel):
 class DistributionMoments(BaseModel):
     mean_taxable_income_inr: float
     median_taxable_income_inr: float
+    mode_taxable_income_inr: Optional[float] = None
+    variance: float
     standard_deviation: float
     skewness: float
     kurtosis: float
@@ -160,6 +164,20 @@ class RegressionForecast(BaseModel):
     projected_next_fy_collection: float
 
 
+class CorrelationItem(BaseModel):
+    pair: str
+    coefficient: float
+    interpretation: str
+
+
+class IQROutlierItem(BaseModel):
+    metric: str
+    lower_bound: float
+    upper_bound: float
+    outlier_count: int
+    outliers: List[Dict[str, Any]]
+
+
 class StatisticalAnalyticsData(BaseModel):
     assessment_year: str
     distribution_moments: DistributionMoments
@@ -167,12 +185,15 @@ class StatisticalAnalyticsData(BaseModel):
     lorenz_curve: List[LorenzCurvePoint]
     income_brackets: List[IncomeBracketItem]
     regression_forecast: RegressionForecast
+    correlations: List[CorrelationItem]
+    iqr_outlier_analysis: List[IQROutlierItem]
 
 
 class CompletenessTableItem(BaseModel):
     table: str
     total_records: int
     completeness_pct: float
+    missing_fields_count: int
 
 
 class ReconciliationStatus(BaseModel):
@@ -193,8 +214,8 @@ class AnomalyItem(BaseModel):
 class DataQualityAnalyticsData(BaseModel):
     overall_health_score: float
     metrics_evaluated: int
+    duplicates_detected: int
     completeness_by_table: List[CompletenessTableItem]
     reconciliation_status: ReconciliationStatus
     anomalies_detected: List[AnomalyItem]
     missing_values_report: List[Dict[str, Any]]
-

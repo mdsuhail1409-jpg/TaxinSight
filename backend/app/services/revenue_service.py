@@ -12,10 +12,24 @@ from app.schemas.tax_schemas import (
 )
 
 
+def safe_div(num: float, den: float, default: float = 0.0) -> float:
+    """Zero-denominator safe division"""
+    if den is None or den == 0.0:
+        return default
+    return num / den
+
+
+def calculate_yoy_growth(curr: float, prev: float) -> float:
+    """YoY Growth = ((Current Year - Previous Year) / Previous Year) * 100"""
+    if prev is None or prev == 0.0 or curr is None:
+        return None
+    return round(((curr - prev) / prev) * 100.0, 2)
+
+
 def get_dashboard_summary(db: Session, financial_year: str = None) -> DashboardSummaryData:
     records = db.query(DirectTaxCollection).order_by(DirectTaxCollection.financial_year.asc()).all()
     if not records:
-        raise ValueError("No direct tax collection records found.")
+        raise ValueError("No direct tax collection records found in database.")
 
     if not financial_year:
         target = records[-1]
@@ -28,23 +42,23 @@ def get_dashboard_summary(db: Session, financial_year: str = None) -> DashboardS
     prev = records[idx - 1] if idx > 0 else None
 
     # Net collection YoY
-    net_yoy = round(((target.net_collection - prev.net_collection) / prev.net_collection) * 100, 2) if prev else None
-    
+    net_yoy = calculate_yoy_growth(target.net_collection, prev.net_collection if prev else None)
+
     # Total filers from ITR filings
     itr_count = db.query(ITRFiling).filter(ITRFiling.financial_year == target.financial_year).all()
     total_filers_count = sum(r.number_of_returns for r in itr_count) if itr_count else 74012000
-    filers_in_crores = round(total_filers_count / 10000000, 2)
-    
+    filers_in_crores = round(total_filers_count / 10000000.0, 2)
+
     prev_itr = db.query(ITRFiling).filter(ITRFiling.financial_year == prev.financial_year).all() if prev else []
     prev_filers = sum(r.number_of_returns for r in prev_itr) if prev_itr else None
-    filers_yoy = round(((total_filers_count - prev_filers) / prev_filers) * 100, 1) if prev_filers else 6.8
+    filers_yoy = calculate_yoy_growth(total_filers_count, prev_filers) if prev_filers else 6.8
 
-    # Revenue composition
-    corp_pct = round((target.corporation_tax / target.net_collection) * 100, 2)
-    pit_pct = round((target.personal_income_tax / target.net_collection) * 100, 2)
+    # Tax Contribution Formulas: (Component Collection / Total Collection) * 100
+    corp_pct = round(safe_div(target.corporation_tax, target.net_collection) * 100.0, 2)
+    pit_pct = round(safe_div(target.personal_income_tax, target.net_collection) * 100.0, 2)
     other_val = target.other_direct_taxes or 0.0
-    other_pct = round((other_val / target.net_collection) * 100, 2)
-    refund_ratio = round((target.refunds / target.gross_collection) * 100, 2)
+    other_pct = round(safe_div(other_val, target.net_collection) * 100.0, 2)
+    refund_ratio = round(safe_div(target.refunds, target.gross_collection) * 100.0, 2)
 
     kpis = ExecutiveKPIs(
         net_collection=KPIItem(
@@ -103,8 +117,7 @@ def get_dashboard_summary(db: Session, financial_year: str = None) -> DashboardS
 
 
 def get_revenue_analytics(db: Session, start_year: str = None, end_year: str = None) -> RevenueAnalyticsData:
-    query = db.query(DirectTaxCollection).order_by(DirectTaxCollection.financial_year.asc())
-    records = query.all()
+    records = db.query(DirectTaxCollection).order_by(DirectTaxCollection.financial_year.asc()).all()
 
     filtered = []
     include = True if not start_year else False
@@ -118,14 +131,19 @@ def get_revenue_analytics(db: Session, start_year: str = None, end_year: str = N
 
     time_series = []
     buoyancy_list = []
-    for i, r in enumerate(filtered):
-        prev = records[records.index(r) - 1] if records.index(r) > 0 else None
-        yoy_gross = round(((r.gross_collection - prev.gross_collection) / prev.gross_collection) * 100, 2) if prev else None
-        yoy_net = round(((r.net_collection - prev.net_collection) / prev.net_collection) * 100, 2) if prev else None
+    for r in filtered:
+        idx = records.index(r)
+        prev = records[idx - 1] if idx > 0 else None
         
+        yoy_gross = calculate_yoy_growth(r.gross_collection, prev.gross_collection if prev else None)
+        yoy_net = calculate_yoy_growth(r.net_collection, prev.net_collection if prev else None)
+
+        corp_contrib = round(safe_div(r.corporation_tax, r.net_collection) * 100.0, 2)
+        pit_contrib = round(safe_div(r.personal_income_tax, r.net_collection) * 100.0, 2)
+
         gdp_growth = None
         if prev and prev.gdp_current_prices and r.gdp_current_prices:
-            gdp_growth = round(((r.gdp_current_prices - prev.gdp_current_prices) / prev.gdp_current_prices) * 100, 2)
+            gdp_growth = calculate_yoy_growth(r.gdp_current_prices, prev.gdp_current_prices)
 
         time_series.append(
             RevenueTimeSeriesItem(
@@ -140,11 +158,13 @@ def get_revenue_analytics(db: Session, start_year: str = None, end_year: str = N
                 cost_of_collection_pct=r.cost_of_collection_pct,
                 yoy_gross_growth=yoy_gross,
                 yoy_net_growth=yoy_net,
+                corporate_tax_contribution_pct=corp_contrib,
+                personal_tax_contribution_pct=pit_contrib,
             )
         )
 
-        if gdp_growth and yoy_net:
-            b_ratio = round(yoy_net / gdp_growth, 2) if gdp_growth != 0 else None
+        if gdp_growth and yoy_net is not None:
+            b_ratio = round(safe_div(yoy_net, gdp_growth), 2)
             buoyancy_list.append(
                 BuoyancyItem(
                     financial_year=r.financial_year,
@@ -154,8 +174,9 @@ def get_revenue_analytics(db: Session, start_year: str = None, end_year: str = N
                 )
             )
 
-    avg_cost = round(sum(r.cost_of_collection_pct for r in filtered if r.cost_of_collection_pct) / len(filtered), 2) if filtered else 0.54
-    avg_refund_ratio = round(sum((r.refunds / r.gross_collection) * 100 for r in filtered) / len(filtered), 2) if filtered else 15.0
+    cost_records = [r.cost_of_collection_pct for r in filtered if r.cost_of_collection_pct is not None]
+    avg_cost = round(sum(cost_records) / len(cost_records), 2) if cost_records else 0.54
+    avg_refund_ratio = round(sum(safe_div(r.refunds, r.gross_collection) * 100.0 for r in filtered) / len(filtered), 2) if filtered else 15.0
 
     return RevenueAnalyticsData(
         time_series=time_series,
@@ -166,4 +187,3 @@ def get_revenue_analytics(db: Session, start_year: str = None, end_year: str = N
             "peak_collection_year": max(filtered, key=lambda x: x.net_collection).financial_year if filtered else "2022-23",
         },
     )
-

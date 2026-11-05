@@ -1,15 +1,18 @@
+import os
 from typing import List, Union
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "TaxinSight API"
-    VERSION: str = "0.1.0"
+    PROJECT_NAME: str = "TaxInsight – Income Tax Data Analytics and Intelligence Dashboard"
+    VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     APP_ENV: str = "development"
     DATABASE_URL: str = "sqlite:///./taxinsight.db"
-    CORS_ORIGINS: Union[List[str], str] = ["http://localhost:5173"]
+    CORS_ORIGINS: Union[List[str], str] = ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"]
+    MAX_UPLOAD_SIZE_MB: int = 15
+    UPLOAD_DIR: str = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "raw"))
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
@@ -17,7 +20,7 @@ class Settings(BaseSettings):
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",") if i.strip()]
         elif isinstance(v, (list, str)):
-            return v  # let pydantic parse json list or keep list
+            return v
         raise ValueError(v)
 
     model_config = SettingsConfigDict(
