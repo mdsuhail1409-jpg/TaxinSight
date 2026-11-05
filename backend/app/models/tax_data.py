@@ -56,3 +56,4 @@ class IncomeSlabDistribution(Base):
     number_of_filers = Column(Integer, nullable=False)
     total_taxable_income = Column(Float, nullable=False)
     total_tax_liability = Column(Float, nullable=False)
+

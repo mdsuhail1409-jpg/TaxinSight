@@ -26,3 +26,4 @@ class DatasetProcessResult(BaseModel):
     status: str
     records_ingested: int
     warnings: List[str]
+

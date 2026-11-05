@@ -61,3 +61,4 @@ def get_dataset_preview(dataset_id: str, db: Session = Depends(get_db)):
 def process_uploaded_dataset(dataset_id: str, db: Session = Depends(get_db)):
     result = process_dataset(dataset_id=dataset_id, db=db)
     return APIResponse(data=result, message="Dataset processed successfully.")
+

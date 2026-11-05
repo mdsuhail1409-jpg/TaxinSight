@@ -14,3 +14,4 @@ def dashboard_summary(
 ):
     data = get_dashboard_summary(db=db, financial_year=financial_year)
     return APIResponse(data=data.model_dump())
+

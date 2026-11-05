@@ -197,3 +197,4 @@ class DataQualityAnalyticsData(BaseModel):
     reconciliation_status: ReconciliationStatus
     anomalies_detected: List[AnomalyItem]
     missing_values_report: List[Dict[str, Any]]
+

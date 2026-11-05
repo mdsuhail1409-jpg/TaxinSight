@@ -158,3 +158,4 @@ Audit log and metadata registry for dataset files uploaded and processed by the 
 | `record_count` | INTEGER | Yes | Number of records successfully parsed |
 | `description` | TEXT | Yes | Purpose and notes on the dataset |
 | `validation_log`| TEXT (JSON) | Yes | Structured JSON log containing validation notes or error traces |
+

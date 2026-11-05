@@ -53,3 +53,4 @@ def statistical_analytics(
 def data_quality_analytics(db: Session = Depends(get_db)):
     data = get_data_quality_analytics(db=db)
     return APIResponse(data=data.model_dump())
+

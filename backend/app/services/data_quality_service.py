@@ -75,3 +75,4 @@ def get_data_quality_analytics(db: Session) -> DataQualityAnalyticsData:
         anomalies_detected=anomalies,
         missing_values_report=missing_report,
     )
+

@@ -15,3 +15,4 @@ class DatasetMetadata(Base):
     record_count = Column(Integer, nullable=True)
     description = Column(Text, nullable=True)
     validation_log = Column(Text, nullable=True)
+

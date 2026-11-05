@@ -239,3 +239,4 @@ def generate_excel_report(db: Session, financial_year: str = None) -> io.BytesIO
     wb.save(buffer)
     buffer.seek(0)
     return buffer
+

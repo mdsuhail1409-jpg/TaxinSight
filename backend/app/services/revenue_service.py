@@ -166,3 +166,4 @@ def get_revenue_analytics(db: Session, start_year: str = None, end_year: str = N
             "peak_collection_year": max(filtered, key=lambda x: x.net_collection).financial_year if filtered else "2022-23",
         },
     )
+

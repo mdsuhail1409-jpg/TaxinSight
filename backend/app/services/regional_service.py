@@ -73,3 +73,4 @@ def get_regional_analytics(db: Session, financial_year: str = None, zone: str = 
         ),
         all_states=state_items,
     )
+

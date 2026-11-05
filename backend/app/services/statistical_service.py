@@ -142,3 +142,4 @@ def get_statistical_analytics(db: Session, assessment_year: str = None) -> Stati
             projected_next_fy_collection=projected_next,
         ),
     )
+

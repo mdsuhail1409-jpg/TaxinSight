@@ -65,3 +65,4 @@ def get_itr_analytics(db: Session, assessment_year: str = None) -> ITRAnalyticsD
         form_distribution=form_distribution,
         category_distribution=category_distribution,
     )
+

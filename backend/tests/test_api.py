@@ -80,3 +80,4 @@ def test_report_excel():
     assert response.status_code == 200
     assert "spreadsheetml" in response.headers["content-type"]
     assert len(response.content) > 1000
+

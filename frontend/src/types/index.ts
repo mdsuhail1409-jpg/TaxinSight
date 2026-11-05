@@ -209,3 +209,4 @@ export interface DatasetPreviewData {
   total_rows: number;
   preview_rows: Record<string, unknown>[];
 }
+
