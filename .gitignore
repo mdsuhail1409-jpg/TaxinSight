@@ -66,3 +66,5 @@ htmlcov/
 .pytest_cache/
 
 *.tsbuildinfo
+*.db
+*.sqlite3
