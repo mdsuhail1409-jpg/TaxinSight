@@ -57,3 +57,4 @@ npm install
 npm run dev
 ```
 Frontend development server will run at: `http://localhost:5173`
+

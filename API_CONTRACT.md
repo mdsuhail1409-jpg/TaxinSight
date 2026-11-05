@@ -62,3 +62,4 @@ Error response structure:
 - **`POST /api/v1/reports/export`**
   - **Payload**: Filter configuration and format (`csv` | `pdf` | `json`).
   - **Response**: File download stream or URL.
+

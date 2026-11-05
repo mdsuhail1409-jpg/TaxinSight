@@ -21,3 +21,4 @@ TaxinSight provides an interactive dashboard and data pipeline for analytical mo
 3. **Backend Service & Route Implementation**: Core computational endpoints, filters, aggregation services.
 4. **Frontend UI & Visualizations**: Layout, interactive filter bars, metric KPI cards, dynamic charts.
 5. **Testing & Integration**: End-to-end integration tests, performance benchmarking, documentation finalization.
+

@@ -12,3 +12,4 @@ This document defines the schema, field descriptions, data types, and constraint
 | `effective_rate` | `float` | Calculated percentage rate (`tax_amount / amount`) | Yes | `0.0899` |
 | `status` | `string` | Record verification state | No | `pending`, `processed`, `flagged` |
 | `metadata` | `json` | Arbitrary key-value metadata pairs | Yes | `{"region": "US-NY"}` |
+

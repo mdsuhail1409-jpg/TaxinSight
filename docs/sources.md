@@ -17,3 +17,4 @@ This document outlines primary data sources, ingestion frequencies, and protocol
 - Raw data stored in `data/raw/` must remain immutable.
 - Transformation scripts clean, validate, and write output to `data/processed/`.
 - Schema validation is enforced via Pydantic schemas prior to ingestion into the serving layer.
+

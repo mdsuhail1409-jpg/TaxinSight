@@ -17,3 +17,4 @@ When running the backend server (`uvicorn app.main:app --reload`), view interact
 - `GET /api/v1/metrics/summary`: Aggregate metrics across filters
 - `GET /api/v1/analytics/timeseries`: Temporal trend data for charts
 - `GET /api/v1/analytics/breakdown`: Segmented breakdown data
+
