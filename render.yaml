@@ -14,3 +14,4 @@ services:
         value: sqlite:///./taxinsight.db
       - key: CORS_ORIGINS
         value: "http://localhost:5173,https://taxinsight.vercel.app,https://*.vercel.app"
+

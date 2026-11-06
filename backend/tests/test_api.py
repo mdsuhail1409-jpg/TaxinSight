@@ -106,6 +106,56 @@ def test_upload_valid_csv():
     assert res_data["data"]["filename"] == "test_upload.csv"
 
 
+def test_upload_empty_file():
+    # Attempting to upload a 0-byte file should be rejected with HTTP 400
+    response = client.post(
+        "/api/datasets/upload",
+        files={"file": ("empty.csv", io.BytesIO(b""), "text/csv")}
+    )
+    assert response.status_code == 400
+    assert "empty" in response.json()["detail"].lower()
+
+
+def test_dataset_preview_and_process():
+    # First get datasets list
+    list_res = client.get("/api/datasets")
+    assert list_res.status_code == 200
+    datasets = list_res.json()["data"]
+    assert len(datasets) > 0
+    ds_id = datasets[0]["id"]
+
+    # Preview dataset
+    preview_res = client.get(f"/api/datasets/{ds_id}/preview")
+    assert preview_res.status_code == 200
+    preview_data = preview_res.json()["data"]
+    assert "columns" in preview_data
+    assert "preview_rows" in preview_data
+
+    # Process dataset
+    proc_res = client.post(f"/api/datasets/{ds_id}/process")
+    assert proc_res.status_code == 200
+    proc_data = proc_res.json()["data"]
+    assert proc_data["status"] == "processed"
+
+
+def test_analytics_filters():
+    # Revenue filter
+    rev_res = client.get("/api/analytics/revenue?start_year=2018-19&end_year=2022-23")
+    assert rev_res.status_code == 200
+    assert len(rev_res.json()["data"]["time_series"]) == 5
+
+    # Regional filter by zone
+    reg_res = client.get("/api/analytics/regional?financial_year=2022-23&zone=South")
+    assert reg_res.status_code == 200
+    reg_data = reg_res.json()["data"]
+    assert all(s["zone"] == "South" for s in reg_data["all_states"])
+
+    # ITR filter by AY
+    itr_res = client.get("/api/analytics/itr?assessment_year=2023-24")
+    assert itr_res.status_code == 200
+    assert itr_res.json()["data"]["assessment_year"] == "2023-24"
+
+
 def test_report_pdf():
     response = client.get("/api/reports/pdf")
     assert response.status_code == 200

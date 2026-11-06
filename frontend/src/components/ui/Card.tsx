@@ -26,3 +26,4 @@ export default function Card({ title, subtitle, action, children, className = ''
     </div>
   );
 }
+

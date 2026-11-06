@@ -36,6 +36,20 @@ def test_iqr_outlier_detection():
     assert any(o["identifier"] == "y8" for o in res.outliers)
 
 
+def test_insufficient_observations_iqr():
+    # Fewer than 4 observations should safely return 0 outliers without throwing exceptions
+    values = [10.0, 20.0, 30.0]
+    keys = ["k1", "k2", "k3"]
+    res = calculate_iqr_outliers("SmallSeries", values, keys)
+    assert res.outlier_count == 0
+    assert len(res.outliers) == 0
+
+
+def test_zero_change_growth():
+    # Zero change yields 0.0% growth
+    assert calculate_yoy_growth(100.0, 100.0) == 0.0
+
+
 def test_sanitize_filename():
     assert sanitize_filename("../../../etc/passwd") == "passwd"
     assert sanitize_filename("test file (1).csv") == "test_file__1_.csv"

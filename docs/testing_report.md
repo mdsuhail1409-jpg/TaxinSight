@@ -89,27 +89,32 @@ $ pytest -v
 ============================= test session starts =============================
 platform win32 -- Python 3.12.2, pytest-9.2.0, pluggy-1.7.0
 rootdir: C:\Users\suhai\.gemini\antigravity\scratch\TaxinSight\backend
-collected 17 items
+collected 22 items
 
-tests/test_api.py::test_health PASSED                                    [  5%]
-tests/test_api.py::test_dashboard_summary PASSED                         [ 11%]
-tests/test_api.py::test_revenue_analytics PASSED                         [ 17%]
-tests/test_api.py::test_regional_analytics PASSED                        [ 23%]
-tests/test_api.py::test_itr_analytics PASSED                             [ 29%]
-tests/test_api.py::test_statistical_analytics PASSED                     [ 35%]
-tests/test_api.py::test_data_quality_analytics PASSED                    [ 41%]
-tests/test_api.py::test_datasets_list PASSED                             [ 47%]
-tests/test_api.py::test_upload_invalid_extension PASSED                  [ 52%]
-tests/test_api.py::test_upload_valid_csv PASSED                          [ 58%]
-tests/test_api.py::test_report_pdf PASSED                                [ 64%]
-tests/test_api.py::test_report_excel PASSED                              [ 70%]
-tests/test_services.py::test_yoy_growth_formula PASSED                   [ 76%]
-tests/test_services.py::test_yoy_growth_zero_and_none_denominator PASSED [ 82%]
-tests/test_services.py::test_safe_div PASSED                             [ 88%]
-tests/test_services.py::test_iqr_outlier_detection PASSED                [ 94%]
+tests/test_api.py::test_health PASSED                                    [  4%]
+tests/test_api.py::test_dashboard_summary PASSED                         [  9%]
+tests/test_api.py::test_revenue_analytics PASSED                         [ 13%]
+tests/test_api.py::test_regional_analytics PASSED                        [ 18%]
+tests/test_api.py::test_itr_analytics PASSED                             [ 22%]
+tests/test_api.py::test_statistical_analytics PASSED                     [ 27%]
+tests/test_api.py::test_data_quality_analytics PASSED                    [ 31%]
+tests/test_api.py::test_datasets_list PASSED                             [ 36%]
+tests/test_api.py::test_upload_invalid_extension PASSED                  [ 40%]
+tests/test_api.py::test_upload_valid_csv PASSED                          [ 45%]
+tests/test_api.py::test_upload_empty_file PASSED                         [ 50%]
+tests/test_api.py::test_dataset_preview_and_process PASSED               [ 54%]
+tests/test_api.py::test_analytics_filters PASSED                         [ 59%]
+tests/test_api.py::test_report_pdf PASSED                                [ 63%]
+tests/test_api.py::test_report_excel PASSED                              [ 68%]
+tests/test_services.py::test_yoy_growth_formula PASSED                   [ 72%]
+tests/test_services.py::test_yoy_growth_zero_and_none_denominator PASSED [ 77%]
+tests/test_services.py::test_safe_div PASSED                             [ 81%]
+tests/test_services.py::test_iqr_outlier_detection PASSED                [ 86%]
+tests/test_services.py::test_insufficient_observations_iqr PASSED        [ 90%]
+tests/test_services.py::test_zero_change_growth PASSED                   [ 95%]
 tests/test_services.py::test_sanitize_filename PASSED                    [100%]
 
-======================= 17 passed, 4 warnings in 7.66s ========================
+======================= 22 passed, 4 warnings in 7.55s ========================
 ```
 
 ---
@@ -157,3 +162,4 @@ The application meets all enterprise quality benchmarks, passes 100% of automate
 
 **Signed:** Lead QA & Integration Specialist  
 **Approval Status:** APPROVED FOR PRODUCTION
+

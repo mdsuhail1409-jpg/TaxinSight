@@ -160,3 +160,4 @@ npm run dev -- --port 5173
 - **Frontend Application:** `http://localhost:5173`
 - **FastAPI Interactive Docs:** `http://127.0.0.1:8000/docs`
 - **API Healthcheck:** `http://127.0.0.1:8000/api/health`
+

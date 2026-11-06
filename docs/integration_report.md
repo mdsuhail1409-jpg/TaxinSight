@@ -193,3 +193,4 @@ curl -X GET "http://127.0.0.1:8000/api/reports/excel?financial_year=2023-24" --o
 ## 7. Integration Sign-Off
 
 All client-server channels are validated, contracts are aligned with zero discrepancies, and defensive fallbacks operate correctly under edge-case conditions.
+
