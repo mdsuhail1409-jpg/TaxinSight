@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { UploadCloud, FileSpreadsheet, Check, Eye, RefreshCw, AlertCircle } from 'lucide-react';
+import { UploadCloud, FileSpreadsheet, Check, Eye, RefreshCw, AlertCircle, X } from 'lucide-react';
 import { taxService } from '../services/taxService';
 import { DatasetItem, DatasetPreviewData } from '../types';
+import Badge from '../components/ui/Badge';
 
 export default function DatasetManagementPage() {
   const [datasets, setDatasets] = useState<DatasetItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [uploading, setUploading] = useState<boolean>(false);
-  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
-  const [uploadError, setUploadError] = useState<string | null>(null);
   const [description, setDescription] = useState<string>('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<DatasetPreviewData | null>(null);
+  const [actionNotification, setActionNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const fetchDatasets = () => {
     setLoading(true);
@@ -30,12 +30,12 @@ export default function DatasetManagementPage() {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (file.size > 15 * 1024 * 1024) {
-        setUploadError('File exceeds 15MB limit.');
+        setActionNotification({ type: 'error', message: 'File exceeds 15MB limit.' });
         setSelectedFile(null);
         return;
       }
       setSelectedFile(file);
-      setUploadError(null);
+      setActionNotification(null);
     }
   };
 
@@ -43,17 +43,22 @@ export default function DatasetManagementPage() {
     e.preventDefault();
     if (!selectedFile) return;
     setUploading(true);
-    setUploadError(null);
-    setUploadSuccess(null);
+    setActionNotification(null);
 
     try {
       await taxService.uploadDataset(selectedFile, description);
-      setUploadSuccess(`Successfully uploaded "${selectedFile.name}"!`);
+      setActionNotification({
+        type: 'success',
+        message: `Successfully uploaded and staged "${selectedFile.name}"!`,
+      });
       setSelectedFile(null);
       setDescription('');
       fetchDatasets();
     } catch (err: any) {
-      setUploadError(err.response?.data?.detail || err.message || 'Upload failed.');
+      setActionNotification({
+        type: 'error',
+        message: err.response?.data?.detail || err.message || 'Upload failed.',
+      });
     } finally {
       setUploading(false);
     }
@@ -63,18 +68,28 @@ export default function DatasetManagementPage() {
     try {
       const data = await taxService.getDatasetPreview(id);
       setPreview(data);
+      setActionNotification(null);
     } catch (err: any) {
-      alert('Could not preview dataset: ' + (err.message || ''));
+      setActionNotification({
+        type: 'error',
+        message: 'Could not preview dataset: ' + (err.message || 'File not found on disk.'),
+      });
     }
   };
 
   const handleProcess = async (id: string) => {
     try {
       await taxService.processDataset(id);
-      alert('Dataset processed and schema staged successfully.');
+      setActionNotification({
+        type: 'success',
+        message: 'Dataset processed and relational schema staged successfully.',
+      });
       fetchDatasets();
     } catch (err: any) {
-      alert('Failed to process dataset: ' + (err.message || ''));
+      setActionNotification({
+        type: 'error',
+        message: 'Failed to process dataset: ' + (err.message || 'Internal processing error.'),
+      });
     }
   };
 
@@ -132,17 +147,21 @@ export default function DatasetManagementPage() {
             </button>
           </div>
 
-          {uploadSuccess && (
-            <div className="flex items-center space-x-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 p-2.5 rounded-lg">
-              <Check className="w-4 h-4" />
-              <span>{uploadSuccess}</span>
-            </div>
-          )}
-
-          {uploadError && (
-            <div className="flex items-center space-x-2 text-xs text-rose-700 bg-rose-50 border border-rose-200 p-2.5 rounded-lg">
-              <AlertCircle className="w-4 h-4" />
-              <span>{uploadError}</span>
+          {actionNotification && (
+            <div
+              className={`flex items-center justify-between text-xs p-2.5 rounded-lg border ${
+                actionNotification.type === 'success'
+                  ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                  : 'text-rose-700 bg-rose-50 border-rose-200'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                {actionNotification.type === 'success' ? <Check className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                <span>{actionNotification.message}</span>
+              </div>
+              <button onClick={() => setActionNotification(null)} className="p-0.5 text-slate-400 hover:text-slate-600">
+                <X className="w-3.5 h-3.5" />
+              </button>
             </div>
           )}
         </form>
@@ -185,15 +204,9 @@ export default function DatasetManagementPage() {
                     <td className="py-2.5 px-3 uppercase text-[10px] font-bold text-slate-500">{d.file_type}</td>
                     <td className="py-2.5 px-3 text-slate-500">{(d.file_size_bytes / 1024).toFixed(1)} KB</td>
                     <td className="py-2.5 px-3">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                          d.status === 'processed'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-amber-100 text-amber-800'
-                        }`}
-                      >
+                      <Badge variant={d.status === 'processed' ? 'emerald' : 'amber'}>
                         {d.status}
-                      </span>
+                      </Badge>
                     </td>
                     <td className="py-2.5 px-3 text-slate-600 truncate max-w-xs">{d.description || '-'}</td>
                     <td className="py-2.5 px-3 text-right space-x-2">

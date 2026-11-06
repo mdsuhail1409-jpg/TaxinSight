@@ -36,7 +36,8 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
           />
         </div>
 
-        <div className="hidden 2xl:flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200/80 text-[11px] font-semibold text-emerald-800">
+        <div className="hidden xl:flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-emerald-50/80 border border-emerald-200/80 text-[11px] font-semibold text-emerald-800">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
           <span>CBDT Official Statistics</span>
         </div>
@@ -47,10 +48,11 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
           href="http://127.0.0.1:8000/docs"
           target="_blank"
           rel="noreferrer"
-          className="hidden sm:inline-flex items-center space-x-1.5 px-2.5 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-medium transition"
+          title="Interactive Swagger / OpenAPI Documentation"
+          className="hidden sm:inline-flex items-center space-x-1.5 px-2.5 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-medium transition cursor-pointer"
         >
           <Database className="w-3.5 h-3.5 text-indigo-600" />
-          <span>API Docs</span>
+          <span>FastAPI Docs</span>
         </a>
       </div>
     </header>
