@@ -1,44 +1,58 @@
-import { ShieldCheck, Database, FileText } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Database, Menu, ShieldCheck } from 'lucide-react';
+import Breadcrumbs from '../ui/Breadcrumbs';
+import ExportButtons from '../ui/ExportButtons';
+import DatasetSelector from '../filters/DatasetSelector';
 
-export default function Header() {
+interface HeaderProps {
+  onToggleSidebar?: () => void;
+}
+
+export default function Header({ onToggleSidebar }: HeaderProps) {
+  const [selectedDataset, setSelectedDataset] = useState('cbdt-official-time-series');
+
   return (
-    <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-30">
+    <header className="h-16 bg-white border-b border-slate-200/90 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+      {/* Left: Mobile Toggle + Breadcrumbs */}
       <div className="flex items-center space-x-3">
-        <span className="text-xs font-semibold px-2.5 py-1 rounded bg-blue-50 text-blue-800 border border-blue-200">
-          CBDT Official Direct Tax Data
-        </span>
-        <span className="text-xs text-slate-400 hidden sm:inline">|</span>
-        <span className="text-xs text-slate-500 hidden sm:inline">
-          Ministry of Finance, Government of India
-        </span>
+        {onToggleSidebar && (
+          <button
+            onClick={onToggleSidebar}
+            className="md:hidden p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition"
+            aria-label="Toggle navigation menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
+        <Breadcrumbs />
       </div>
 
-      <div className="flex items-center space-x-4">
-        <div className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200">
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>API Connected</span>
+      {/* Center / Right: Dataset Selector, Source Pill, Export Controls */}
+      <div className="flex items-center space-x-3">
+        <div className="hidden lg:block">
+          <DatasetSelector
+            selectedDataset={selectedDataset}
+            onDatasetChange={setSelectedDataset}
+          />
         </div>
 
-        <Link
-          to="/reports"
-          className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-xs font-medium transition shadow-sm"
-        >
-          <FileText className="w-3.5 h-3.5" />
-          <span>Export Reports</span>
-        </Link>
+        <div className="hidden 2xl:flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200/80 text-[11px] font-semibold text-emerald-800">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+          <span>CBDT Official Statistics</span>
+        </div>
+
+        <ExportButtons financialYear="2022-23" />
 
         <a
           href="http://127.0.0.1:8000/docs"
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center space-x-1.5 px-3 py-1.5 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-md text-xs font-medium transition"
+          className="hidden sm:inline-flex items-center space-x-1.5 px-2.5 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-medium transition"
         >
-          <Database className="w-3.5 h-3.5" />
-          <span>FastAPI Docs</span>
+          <Database className="w-3.5 h-3.5 text-indigo-600" />
+          <span>API Docs</span>
         </a>
       </div>
     </header>
   );
 }
-

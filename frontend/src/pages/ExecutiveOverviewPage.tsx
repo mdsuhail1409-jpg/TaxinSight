@@ -12,11 +12,13 @@ import {
   Cell,
   Legend,
 } from 'recharts';
-import { IndianRupee, Building2, User, RefreshCw, Users, Gauge } from 'lucide-react';
+import { IndianRupee, Building2, User, RefreshCw, Users, Gauge, Lightbulb } from 'lucide-react';
 import { taxService } from '../services/taxService';
 import { DashboardSummaryData } from '../types';
 import KPICard from '../components/dashboard/KPICard';
 import YearFilter from '../components/filters/YearFilter';
+import LoadingState from '../components/ui/LoadingState';
+import ErrorState from '../components/ui/ErrorState';
 
 const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
 
@@ -26,54 +28,40 @@ export default function ExecutiveOverviewPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
+  const fetchData = () => {
     setLoading(true);
     taxService
       .getDashboardSummary(selectedFY)
       .then((res) => {
-        if (isMounted) {
-          setData(res);
-          setError(null);
-        }
+        setData(res);
+        setError(null);
       })
-      .catch((err) => {
-        if (isMounted) setError(err.message || 'Failed to fetch executive summary.');
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
-    return () => {
-      isMounted = false;
-    };
+      .catch((err) => setError(err.message || 'Failed to fetch executive summary.'))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [selectedFY]);
 
   if (loading && !data) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-      </div>
-    );
+    return <LoadingState message="Loading Executive Dashboard..." submessage="Querying macro direct tax time-series telemetry" />;
   }
 
   if (error || !data) {
-    return (
-      <div className="p-6 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-sm">
-        Error loading executive dashboard: {error}
-      </div>
-    );
+    return <ErrorState error={error || 'Failed to load executive summary'} onRetry={fetchData} />;
   }
 
   const { kpis, historical_trend, revenue_composition } = data;
 
   return (
     <div className="space-y-6">
-      {/* Title & Controls Bar */}
+      {/* Title & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Executive Overview</h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Macro-level direct tax collection trajectory, composition, and macroeconomic buoyancy
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Executive Overview</h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Macro-level direct tax collections, corporate vs personal parity, and GDP buoyancy
           </p>
         </div>
 
@@ -83,23 +71,23 @@ export default function ExecutiveOverviewPage() {
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
         <KPICard
-          title="Net Direct Tax Collection"
+          title="Total Net Direct Tax"
           value={`₹ ${(kpis.net_collection.value / 100000).toFixed(2)} Lakh Cr`}
           unit={`(₹ ${kpis.net_collection.value.toLocaleString('en-IN')} Cr)`}
           change={kpis.net_collection.yoy_growth_pct}
           isPositive={kpis.net_collection.is_positive}
           changeLabel="YoY Sovereign Growth"
-          icon={<IndianRupee className="w-5 h-5" />}
+          icon={<IndianRupee className="w-4 h-4 text-indigo-600" />}
         />
 
         <KPICard
           title="Corporation Tax (CIT)"
           value={`₹ ${(kpis.corporation_tax.value / 100000).toFixed(2)} Lakh Cr`}
           unit={`(${kpis.corporation_tax.share_of_direct_tax_pct}% of total)`}
-          subtitle="Corporate tax returns"
-          icon={<Building2 className="w-5 h-5" />}
+          subtitle="Corporate income returns"
+          icon={<Building2 className="w-4 h-4 text-blue-600" />}
         />
 
         <KPICard
@@ -107,7 +95,7 @@ export default function ExecutiveOverviewPage() {
           value={`₹ ${(kpis.personal_income_tax.value / 100000).toFixed(2)} Lakh Cr`}
           unit={`(${kpis.personal_income_tax.share_of_direct_tax_pct}% of total)`}
           subtitle="Individuals & non-corporates"
-          icon={<User className="w-5 h-5" />}
+          icon={<User className="w-4 h-4 text-emerald-600" />}
         />
 
         <KPICard
@@ -115,7 +103,7 @@ export default function ExecutiveOverviewPage() {
           value={`₹ ${(kpis.refunds_issued.value / 100000).toFixed(2)} Lakh Cr`}
           unit={`(${kpis.refunds_issued.refund_to_gross_pct}% of gross)`}
           subtitle="Automated refund processing"
-          icon={<RefreshCw className="w-5 h-5" />}
+          icon={<RefreshCw className="w-4 h-4 text-amber-600" />}
         />
 
         <KPICard
@@ -124,30 +112,30 @@ export default function ExecutiveOverviewPage() {
           unit="Cumulative returns"
           change={kpis.total_filers.yoy_growth_pct}
           changeLabel="YoY Filer Expansion"
-          icon={<Users className="w-5 h-5" />}
+          icon={<Users className="w-4 h-4 text-purple-600" />}
         />
 
         <KPICard
           title="Direct Tax Buoyancy"
           value={kpis.buoyancy_factor ? kpis.buoyancy_factor.toFixed(2) : '1.18'}
-          unit="Ratio to GDP Growth"
+          unit="Elasticity Ratio"
           subtitle="% Δ Tax / % Δ Nominal GDP"
-          icon={<Gauge className="w-5 h-5" />}
+          icon={<Gauge className="w-4 h-4 text-cyan-600" />}
         />
       </div>
 
-      {/* Main Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Historical Trendline Chart */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Historical Revenue Trend */}
+        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                Direct Tax Collection Time Series (₹ Crore)
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                Direct Tax Revenue Trajectory (₹ Crore)
               </h3>
-              <p className="text-xs text-slate-500">Gross vs Net Collections across Financial Years</p>
+              <p className="text-[11px] text-slate-500">Gross vs Net collections across Financial Years</p>
             </div>
-            <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
               CBDT Historical Archive
             </span>
           </div>
@@ -157,12 +145,12 @@ export default function ExecutiveOverviewPage() {
               <AreaChart data={historical_trend} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="netGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.4} />
+                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.35} />
                     <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.0} />
                   </linearGradient>
                   <linearGradient id="corpGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
@@ -174,23 +162,23 @@ export default function ExecutiveOverviewPage() {
                   tickFormatter={(val) => `₹${(val / 100000).toFixed(1)}L Cr`}
                 />
                 <Tooltip
-                  formatter={(val: number) => [`₹ ${val.toLocaleString('en-IN')} Cr`, 'Collection']}
+                  formatter={(val: number) => [`₹ ${val.toLocaleString('en-IN')} Cr`, '']}
                   labelStyle={{ fontWeight: 'bold' }}
                 />
-                <Area type="monotone" dataKey="net_collection" stroke="#4f46e5" strokeWidth={2.5} fillOpacity={1} fill="url(#netGrad)" name="Net Collection" />
-                <Area type="monotone" dataKey="corporation_tax" stroke="#3b82f6" strokeWidth={1.5} fillOpacity={1} fill="url(#corpGrad)" name="Corporation Tax" />
+                <Area type="monotone" dataKey="net_collection" stroke="#4f46e5" strokeWidth={2} fillOpacity={1} fill="url(#netGrad)" name="Net Direct Tax" />
+                <Area type="monotone" dataKey="corporation_tax" stroke="#0ea5e9" strokeWidth={1.5} fillOpacity={1} fill="url(#corpGrad)" name="Corporation Tax" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Revenue Composition Donut Chart */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
+        {/* Tax Composition Donut */}
+        <div className="bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between">
           <div>
-            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">
-              Direct Tax Mix ({data.selected_financial_year})
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1">
+              Revenue Composition ({data.selected_financial_year})
             </h3>
-            <p className="text-xs text-slate-500 mb-4">Corporate vs Personal Income Tax parity</p>
+            <p className="text-[11px] text-slate-500 mb-3">CIT vs PIT vs Other Direct Taxes share</p>
 
             <div className="h-52 w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -215,19 +203,38 @@ export default function ExecutiveOverviewPage() {
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1">
+          <div className="pt-3 border-t border-slate-100 text-xs text-slate-500 space-y-1">
             <div className="flex justify-between">
               <span>Assessment Year:</span>
               <span className="font-semibold text-slate-700">{data.selected_assessment_year}</span>
             </div>
             <div className="flex justify-between">
-              <span>Domain Standard:</span>
-              <span className="font-semibold text-slate-700">CBDT Methodological Schedule</span>
+              <span>Accounting Basis:</span>
+              <span className="font-semibold text-slate-700">Gross − Refunds = Net</span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Key Analytical Insights Callout */}
+      <div className="bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
+        <div className="flex items-start space-x-3">
+          <div className="p-2 bg-amber-50 text-amber-700 rounded-lg shrink-0">
+            <Lightbulb className="w-5 h-5" />
+          </div>
+          <div className="space-y-1">
+            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+              Key Strategic Findings ({data.selected_financial_year})
+            </h4>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              • <strong>CIT vs. PIT Parity</strong>: In FY {data.selected_financial_year}, Personal Income Tax collections (₹ {(kpis.personal_income_tax.value / 100000).toFixed(2)} Lakh Cr) reached parity with Corporate Tax (₹ {(kpis.corporation_tax.value / 100000).toFixed(2)} Lakh Cr), reflecting expanding formal individual taxpayer participation and digital TDS coverage.
+            </p>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              • <strong>Buoyancy Coefficient ({kpis.buoyancy_factor ?? '1.18'})</strong>: A direct tax buoyancy factor exceeding 1.0 indicates that tax collections expanded faster than nominal GDP, signifying robust structural tax elasticity.
+            </p>
           </div>
         </div>
       </div>
     </div>
   );
 }
-

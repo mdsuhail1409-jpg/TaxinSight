@@ -123,6 +123,8 @@ export interface ITRAnalyticsData {
 export interface DistributionMoments {
   mean_taxable_income_inr: number;
   median_taxable_income_inr: number;
+  mode_taxable_income_inr?: number;
+  variance?: number;
   standard_deviation: number;
   skewness: number;
   kurtosis: number;
@@ -153,6 +155,26 @@ export interface RegressionForecast {
   projected_next_fy_collection: number;
 }
 
+export interface CorrelationItem {
+  pair: string;
+  coefficient: number;
+  interpretation: string;
+}
+
+export interface OutlierDetail {
+  identifier: string;
+  value: number;
+  deviation: string;
+}
+
+export interface IQROutlierItem {
+  metric: string;
+  lower_bound: number;
+  upper_bound: number;
+  outlier_count: number;
+  outliers: OutlierDetail[];
+}
+
 export interface StatisticalAnalyticsData {
   assessment_year: string;
   distribution_moments: DistributionMoments;
@@ -160,6 +182,8 @@ export interface StatisticalAnalyticsData {
   lorenz_curve: LorenzCurvePoint[];
   income_brackets: IncomeBracketItem[];
   regression_forecast: RegressionForecast;
+  correlations?: CorrelationItem[];
+  iqr_outlier_analysis?: IQROutlierItem[];
 }
 
 export interface CompletenessTableItem {

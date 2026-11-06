@@ -40,3 +40,4 @@ def test_sanitize_filename():
     assert sanitize_filename("../../../etc/passwd") == "passwd"
     assert sanitize_filename("test file (1).csv") == "test_file__1_.csv"
     assert sanitize_filename("normal_dataset.xlsx") == "normal_dataset.xlsx"
+
